@@ -45,7 +45,7 @@ if __name__ == '__main__':
             start = (i * batch_size) - batch_size
             end = i * batch_size if i != batches - 1 else num_of_images
 
-            images = get_imgs([INPUT_PATHS[3]],start,end)
+            images = get_imgs([INPUT_PATHS[cam]],start,end)
             processed_imgs = preprocess(images)
 
             temp_image = processed_imgs[0] * 1/num_of_images
@@ -59,9 +59,10 @@ if __name__ == '__main__':
 
         avg_image = avg_image.astype('uint8')
         cv2.imwrite(os.path.join(OUTPUT_PATH[cam],'average.jpg'),avg_image)
-        adapt = cv2.adaptiveThreshold(avg_image,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,151,10)
+        adapt = cv2.adaptiveThreshold(avg_image,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,151,15)
         cv2.imwrite(os.path.join(OUTPUT_PATH[cam],'adapt.jpg'),adapt)
         bitwise_not = cv2.bitwise_not(adapt)
         cv2.imwrite(os.path.join(OUTPUT_PATH[cam],'bitwise_not_adapt.jpg'),bitwise_not)
-        # dilation = cv2.dilate(bitwise_not,np.ones((2,2),np.uint8),iterations = 5)
-        # cv2.imwrite(os.path.join(OUTPUT_PATH[cam],'dilation.jpg'),dilation)
+        erosion = cv2.erode(bitwise_not,np.ones((2,2),np.uint8),iterations = 1)
+        dilation = cv2.dilate(erosion,np.ones((2,2),np.uint8),iterations = 5)
+        cv2.imwrite(os.path.join(OUTPUT_PATH[cam],'final_mask.jpg'),dilation)
